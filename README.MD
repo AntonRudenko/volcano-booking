@@ -1,4 +1,4 @@
-# Volcano trip ("some likes it hot" is internal of the project)
+# Volcano trip ("some likes it hot" - internal name of the project)
  
 Application for booking a campsite on the small unique volcanic island.
 You can book single camp site on an island.
