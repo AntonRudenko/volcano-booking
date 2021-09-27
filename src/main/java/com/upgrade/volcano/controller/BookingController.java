@@ -42,9 +42,18 @@ public class BookingController {
     @GetMapping
     @Cacheable("availability")
     public ResponseEntity<AvailabilityResponse> getAvailability(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
     ) {
+        if (startDate == null && endDate == null) {
+            startDate = LocalDate.now();
+            endDate = startDate.plusMonths(1);
+        }
+
+        if (oneDayIsNullAndOtherIsNot(startDate, endDate)) {
+            throw new ClientValidationException("Start date and end date must be set together");
+        }
+
         if (startDate.isAfter(endDate)) {
             throw new ClientValidationException("Start date is later than end date");
         }
@@ -55,6 +64,10 @@ public class BookingController {
 
         List<Booking> bookedDates = bookingService.getBookedDates(startDate, endDate);
         return ResponseEntity.ok(new AvailabilityResponse(bookedDates, startDate, endDate));
+    }
+
+    private boolean oneDayIsNullAndOtherIsNot(@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam(required = false) LocalDate startDate, @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @RequestParam(required = false) LocalDate endDate) {
+        return (startDate == null && endDate != null) || (startDate != null && endDate == null);
     }
 
     @PostMapping

@@ -41,10 +41,17 @@ public class AvailabilityValidationTestSuite {
         validateError(LocalDate.now().minusDays(5), LocalDate.now().plusDays(2), "Start date is in the past");
     }
 
+    @Test
+    public void oneDateIsNotSet() throws Exception {
+        validateError(LocalDate.now().plusDays(5), null, "Start date and end date must be set together");
+        validateError(null, LocalDate.now().plusDays(5), "Start date and end date must be set together");
+    }
+
+
     private void validateError(LocalDate startDate, LocalDate endDate, String message) throws Exception {
         String errorResponseStr = mockMvc.perform(get("/booking")
-                        .param("startDate", startDate.toString())
-                        .param("endDate", endDate.toString())
+                        .param("startDate", startDate != null ? startDate.toString() : "")
+                        .param("endDate", endDate != null ? endDate.toString() : "")
                 ).andExpect(status().isBadRequest())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andReturn().getResponse().getContentAsString();
